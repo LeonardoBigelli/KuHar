@@ -3,6 +3,7 @@ package com.example.stepbystep
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.text.method.ScrollingMovementMethod
@@ -10,6 +11,7 @@ import android.util.Log
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -18,6 +20,7 @@ import java.io.FileWriter
 import java.io.IOException
 import java.io.OutputStreamWriter
 import java.io.PrintWriter
+import java.time.Instant
 
 
 class MainActivity : AppCompatActivity() {
@@ -26,6 +29,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var myButton: Button
     private lateinit var mSensorReader: SensorReaderHelper
 
+    @RequiresApi(Build.VERSION_CODES.O)
     private val mHandler = SensorDataHandler { sensorData ->
         val sampleSize = 200 // Assuming 200 samples for 2 seconds at 100Hz
         val featuresPerSample = 6 // 3 accelerometer + 3 gyroscope
@@ -40,7 +44,12 @@ class MainActivity : AppCompatActivity() {
             inputData[i][5] = sensorData[i * 6 + 5]
         }
 
-
+        val time = Instant.now().toString()
+        val txt = "campioni"
+        val txt_final = ".txt"
+        val txt_stamp = StringBuilder()
+        txt_stamp.append(txt).append(time).append(txt_final)
+        scriviArraySuFile(this, inputData, txt_stamp.toString())
         val inference = tfliteModel.runInference(inputData)
         var res = resultForHuman_11(inference.first)
         var confidence_score = inference.second
@@ -147,11 +156,11 @@ class MainActivity : AppCompatActivity() {
         val fileOutput =  File(context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), nomeFile)
         PrintWriter(fileOutput).use { writer ->
             for (riga in arrayDati) {
-                val linea = riga.joinToString(" ", "[", "]") { it.toString() }
+                val linea = riga.joinToString(" ") { it.toString() }
                 writer.println(linea)
-                Log.i("wirte", "Scrittura eseguita!")
             }
         }
+        Log.i("write", context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS).toString())
     }
 
     private fun verificaPermessiScrittura() {
