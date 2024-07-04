@@ -1,6 +1,8 @@
 package com.example.stepbystep
 
+import android.Manifest
 import android.content.Context
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.Environment
 import android.text.method.ScrollingMovementMethod
@@ -9,10 +11,13 @@ import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import java.io.File
 import java.io.FileWriter
 import java.io.IOException
 import java.io.OutputStreamWriter
+import java.io.PrintWriter
 
 
 class MainActivity : AppCompatActivity() {
@@ -35,9 +40,7 @@ class MainActivity : AppCompatActivity() {
             inputData[i][5] = sensorData[i * 6 + 5]
         }
 
-      //  requestPermissions(new String[]{WRITE_EXTERNAL_STORAGE,READ_EXTERNAL_STORAGE}, 1)
-       // writeFileOnInternalStorage(this, "file.txt", inputData.toString())
-        generateNoteOnSD("debug.txt", inputData.toString())
+
         val inference = tfliteModel.runInference(inputData)
         var res = resultForHuman_11(inference.first)
         var confidence_score = inference.second
@@ -45,9 +48,7 @@ class MainActivity : AppCompatActivity() {
             res = resultForHuman_11(20)
             confidence_score = 0F
         }
-        val file_w = StringBuilder()
-        file_w.append(res).append(confidence_score)
-        writeToFile(file_w.toString(), this)
+
 
         this@MainActivity.runOnUiThread {
            // displayTextView.text = res
@@ -64,6 +65,17 @@ class MainActivity : AppCompatActivity() {
 
         //model initialization
         tfliteModel = TensorFlowLiteModel(this)
+
+        val permission = Manifest.permission.WRITE_EXTERNAL_STORAGE
+        if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, arrayOf(permission), 112)
+            var msg = "permesso di scrittura concesso"
+            Toast.makeText(this, msg, msg.length)
+        }else {
+            var msg = "permesso di scrittura NON concesso"
+            Toast.makeText(this, msg, msg.length)
+            verificaPermessiScrittura()
+        }
 
         mSensorReader = SensorReaderHelper(
             this,
@@ -130,49 +142,37 @@ class MainActivity : AppCompatActivity() {
         else -> "unknown"
     }
 
-    private fun writeToFile(data: String, context: Context) {
-        try {
-            val outputStreamWriter =
-                OutputStreamWriter(context.openFileOutput("config.txt", MODE_PRIVATE))
-            outputStreamWriter.append(data)
-            outputStreamWriter.close()
-        } catch (e: IOException) {
-            Log.e("Exception", "File write failed: $e")
-        }
-    }
 
-    fun writeFileOnInternalStorage(mcoContext: Context, sFileName: String?, sBody: String?) {
-        val dir = File(mcoContext.filesDir, "mydir")
-        if (!dir.exists()) {
-            dir.mkdir()
-        }
-        try {
-            val gpxfile = File(dir, sFileName)
-            val writer = FileWriter(gpxfile)
-            writer.append(sBody)
-            writer.flush()
-            writer.close()
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-    }
-
-    fun generateNoteOnSD(sFileName: String?, sBody: String?) {
-        try {
-            val root = File(Environment.getExternalStorageDirectory(), "Notes")
-            if (!root.exists()) {
-                root.mkdirs()
+    fun scriviArraySuFile(context: Context, arrayDati: Array<FloatArray>, nomeFile: String) {
+        val fileOutput =  File(context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), nomeFile)
+        PrintWriter(fileOutput).use { writer ->
+            for (riga in arrayDati) {
+                val linea = riga.joinToString(" ", "[", "]") { it.toString() }
+                writer.println(linea)
+                Log.i("wirte", "Scrittura eseguita!")
             }
-            val gpxfile = File(root, sFileName)
-            val writer = FileWriter(gpxfile)
-            writer.append(sBody)
-            writer.flush()
-            writer.close()
-            Toast.makeText(this, "Saved", Toast.LENGTH_SHORT).show()
-        } catch (e: IOException) {
-            e.printStackTrace()
-          //  importError = e.message
-         //   iError()
+        }
+    }
+
+    private fun verificaPermessiScrittura() {
+        val hasWritePermission = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+        if (hasWritePermission != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), 112)
+        }
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == 112) {
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Permesso concesso, puoi procedere con l'operazione di scrittura
+                var msg = "permesso di scrittura concesso"
+                Toast.makeText(this, msg, msg.length)
+            } else {
+                // Permesso negato, mostra un messaggio o gestisci di conseguenza
+                var msg = "permesso di scrittura NON concesso"
+                Toast.makeText(this, msg, msg.length)
+            }
         }
     }
 
