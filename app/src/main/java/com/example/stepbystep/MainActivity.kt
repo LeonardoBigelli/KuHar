@@ -1,6 +1,7 @@
 package com.example.stepbystep
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
@@ -25,7 +26,9 @@ import java.time.Instant
 
 class MainActivity : AppCompatActivity() {
     private lateinit var tfliteModel: TensorFlowLiteModel
+    private lateinit var modelWeight: TensorFlowLiteModel
     private lateinit var displayTextView: TextView
+    private lateinit var displayWeight: TextView
     private lateinit var myButton: Button
     private lateinit var mSensorReader: SensorReaderHelper
 
@@ -44,36 +47,49 @@ class MainActivity : AppCompatActivity() {
             inputData[i][5] = sensorData[i * 6 + 5]
         }
 
+        //codice per scrittura finestra su file
         val time = Instant.now().toString()
         val txt = "campioni"
         val txt_final = ".txt"
         val txt_stamp = StringBuilder()
         txt_stamp.append(txt).append(time).append(txt_final)
         scriviArraySuFile(this, inputData, txt_stamp.toString())
+
+        //inferenza attivita'
         val inference = tfliteModel.runInference(inputData)
-        var res = resultForHuman_11(inference.first)
+        var res = resultForHuman_11(inference.first.toInt())
         var confidence_score = inference.second
         if(confidence_score < 0.5){
             res = resultForHuman_11(20)
             confidence_score = 0F
         }
 
-
         this@MainActivity.runOnUiThread {
-           // displayTextView.text = res
+            //scrittura dell'inferenza sulla attivita'
             displayTextView.append("\n")
             displayTextView.append(res)
             displayTextView.append(" ")
             displayTextView.append(confidence_score.toString())
+
+            //scrittura dell'inferenza del peso se si sta camminando o correndo
+            if(inference.first.toInt() == 7 || inference.first.toInt() == 10 || inference.first.toInt() == 8 || inference.first.toInt() == 9){
+                //inferenza peso
+                val weight = modelWeight.runInference(reshapeInputData(inputData))
+                displayWeight.text = weight.first.toString()
+            }
         }
     }
 
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         //model initialization
-        tfliteModel = TensorFlowLiteModel(this)
+        tfliteModel = TensorFlowLiteModel(this, "model_11_classes.tflite", 11)
+        modelWeight = TensorFlowLiteModel(this, "model_weight(mse2_2).tflite", 1)
 
         val permission = Manifest.permission.WRITE_EXTERNAL_STORAGE
         if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
@@ -95,11 +111,13 @@ class MainActivity : AppCompatActivity() {
         //handler = android.os.Handler(Looper.getMainLooper())
         //button for inference
         myButton = findViewById(R.id.inference_button)
-        //textview
+        //textview per inferenza attivita'
         displayTextView = findViewById(R.id.inference_text)
         displayTextView.setMovementMethod(ScrollingMovementMethod())
         displayTextView.text = "unknown"
 
+        //textview per peso
+        displayWeight = findViewById(R.id.textWeight)
 
         // Imposta un listener per il clic del pulsante
         myButton.setOnClickListener {
@@ -112,6 +130,20 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+    }
+
+    private fun reshapeInputData(inputData: Array<FloatArray>): Array<FloatArray> {
+        var data = Array(50) { FloatArray(6) }
+        for(i in data.indices){
+            data[i][0] = inputData[i * 4][0]
+            data[i][1] = inputData[i * 4][1]
+            data[i][2] = inputData[i * 4][2]
+            data[i][3] = inputData[i * 4][3]
+            data[i][4] = inputData[i * 4][4]
+            data[i][5] = inputData[i * 4][5]
+        }
+        Log.i("PESO", data.size.toString())
+        return data
     }
 
     private fun resultForHuman(n: Int): String = when (n) {

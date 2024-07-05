@@ -8,7 +8,7 @@ import kotlinx.coroutines.launch
 
 class Consumer(context: Context, b: Buffer,textView: TextView) : Runnable{
     private val buffer = b
-    private var tfliteModel = TensorFlowLiteModel(context = MainActivity())
+    private var tfliteModel = TensorFlowLiteModel(context = MainActivity(), "model_11_classes.tflite", 11)
     private var displayTextView = textView
 
 
