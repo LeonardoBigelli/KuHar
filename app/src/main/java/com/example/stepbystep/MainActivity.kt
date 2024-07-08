@@ -113,7 +113,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         //model initialization
-        tfliteModel = TensorFlowLiteModel(this, "model_10_classes.tflite", 10)
+        tfliteModel = TensorFlowLiteModel(this, "model_act_10_classes.tflite", 10)
         modelWeight = TensorFlowLiteModel(this, "model_weight(mse2_2).tflite", 1)
         modelHeight = TensorFlowLiteModel(this, "model_height(mse5_8).tflite", 1)
         modelAge = TensorFlowLiteModel(this, "model_age(mse1_5).tflite", 1)
@@ -185,8 +185,19 @@ class MainActivity : AppCompatActivity() {
             data[i][4] = inputData[i * 4][4]
             data[i][5] = inputData[i * 4][5]
         }
-        Log.i("PESO", data.size.toString())
-        return data
+
+        var data_finale = Array(50) { FloatArray(6) }
+        //inverto assi acceleromentro e giroscopio
+        for(i in data.indices){
+            data_finale[i][0] = data[i][3]
+            data_finale[i][1] = data[i][4]
+            data_finale[i][2] = data[i][5]
+            data_finale[i][3] = data[i][0]
+            data_finale[i][4] = data[i][1]
+            data_finale[i][5] = data[i][2]
+        }
+
+        return data_finale
     }
 
     private fun resultForHuman(n: Int): String = when (n) {
