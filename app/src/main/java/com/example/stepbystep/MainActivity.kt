@@ -10,6 +10,7 @@ import android.os.Environment
 import android.text.method.ScrollingMovementMethod
 import android.util.Log
 import android.widget.Button
+import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
 import androidx.annotation.RequiresApi
@@ -34,6 +35,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var displayHeight: TextView
     private lateinit var displayAge: TextView
     private lateinit var myButton: Button
+    private lateinit var removeButton: ImageButton
     private lateinit var mSensorReader: SensorReaderHelper
 
     //array per calcolare la media dei risultati
@@ -137,6 +139,7 @@ class MainActivity : AppCompatActivity() {
         //handler = android.os.Handler(Looper.getMainLooper())
         //button for inference
         myButton = findViewById(R.id.inference_button)
+        removeButton = findViewById(R.id.remove)
         //textview per inferenza attivita'
         displayTextView = findViewById(R.id.inference_text)
         displayTextView.setMovementMethod(ScrollingMovementMethod())
@@ -158,6 +161,16 @@ class MainActivity : AppCompatActivity() {
                 mSensorReader.start()
                 myButton.text = resources.getText(R.string.btn_start)
             }
+        }
+
+        //codice bottone per svuotare le liste
+        removeButton.setOnClickListener {
+            listWeight.clear()
+            listHeight.clear()
+            listAge.clear()
+            displayAge.text = "Età"
+            displayWeight.text = "Peso"
+            displayHeight.text = "Altezza"
         }
 
     }
@@ -210,6 +223,20 @@ class MainActivity : AppCompatActivity() {
         8 -> "camminare all'indietro"
         9 -> "camminare in cerchio"
         10 -> "correre"
+        else -> "unknown"
+    }
+
+    private fun resultForHuman_10(n: Int): String = when (n) {
+        0 -> "in piedi"
+        1 -> "seduto"
+        2 -> "parlo da seduto"
+        3 -> "alzalsi e sedersi"
+        4 -> "sdraiato"
+        5 -> "saltare"
+        6 -> "camminare"
+        7 -> "camminare all'indietro"
+        8 -> "camminare in cerchio"
+        9 -> "correre"
         else -> "unknown"
     }
 
