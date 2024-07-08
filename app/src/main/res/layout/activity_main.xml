@@ -26,13 +26,36 @@
         android:id="@+id/textWeight"
         android:layout_width="151dp"
         android:layout_height="62dp"
-        android:layout_above="@+id/inference_button"
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
         android:layout_alignParentEnd="true"
-        android:layout_marginStart="131dp"
-        android:layout_marginTop="143dp"
-        android:layout_marginEnd="129dp"
-        android:layout_marginBottom="137dp"
-        android:text="Cammina o corri per scoprire il tuo peso!" />
+        android:layout_marginStart="229dp"
+        android:layout_marginTop="36dp"
+        android:layout_marginEnd="30dp"
+        android:text="Peso" />
+
+    <TextView
+        android:id="@+id/textHeight"
+        android:layout_width="106dp"
+        android:layout_height="59dp"
+        android:layout_below="@+id/textWeight"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginStart="223dp"
+        android:layout_marginTop="41dp"
+        android:layout_marginEnd="82dp"
+        android:text="altezza" />
+
+    <TextView
+        android:id="@+id/textAge"
+        android:layout_width="103dp"
+        android:layout_height="60dp"
+        android:layout_above="@+id/inference_button"
+        android:layout_below="@+id/textHeight"
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="40dp"
+        android:layout_marginEnd="82dp"
+        android:layout_marginBottom="45dp"
+        android:text="eta'" />
+
 </RelativeLayout>
