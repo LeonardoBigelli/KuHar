@@ -46,7 +46,7 @@ class SensorProducer(
         get() = (mSamplingPeriodUs * 1_000) + SAMPLING_RANGE
 
     init {
-        mAccSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION)
+        mAccSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION)//ora tiene conto della gravita'
         if (mAccSensor == null) {
             Log.w(TAG, "Accelerometer sensor is not supported!")
         }
@@ -106,7 +106,7 @@ class SensorProducer(
 
     override fun onSensorChanged(event: SensorEvent?) {
         when (event?.sensor?.type) {
-            Sensor.TYPE_LINEAR_ACCELERATION -> {
+            Sensor.TYPE_LINEAR_ACCELERATION -> {//ora c'é la gravità
                 // The first time mLastAccTs is null, we accept the sample no matter what
                 if (mLastAccTs == null) {
                     mLastAccTs = event.timestamp

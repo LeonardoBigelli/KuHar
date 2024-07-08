@@ -26,7 +26,7 @@ import java.time.Instant
 
 
 class MainActivity : AppCompatActivity() {
- //   private lateinit var tfliteModel: TensorFlowLiteModel
+    private lateinit var tfliteModel: TensorFlowLiteModel
     private lateinit var modelWeight: TensorFlowLiteModel
     private lateinit var modelHeight: TensorFlowLiteModel
     private lateinit var modelAge: TensorFlowLiteModel
@@ -45,7 +45,7 @@ class MainActivity : AppCompatActivity() {
 
     @RequiresApi(Build.VERSION_CODES.O)
     private val mHandler = SensorDataHandler { sensorData ->
-        val sampleSize = 50 // Assuming 200 samples for 2 seconds at 100Hz
+        val sampleSize = 200 // Assuming 200 samples for 2 seconds at 100Hz
         val featuresPerSample = 6 // 3 accelerometer + 3 gyroscope
         val inputData = Array(sampleSize) { FloatArray(featuresPerSample) }
 
@@ -67,18 +67,18 @@ class MainActivity : AppCompatActivity() {
       //  scriviArraySuFile(this, inputData, txt_stamp.toString())
 
         //inferenza attivita'
-     /*   val inference = tfliteModel.runInference(inputData)
-        var res = resultForHuman_11(inference.first.toInt())
+        val inference = tfliteModel.runInference(inputData)
+        var res = resultForHuman_10(inference.first.toInt())
         var confidence_score = inference.second
-        if(confidence_score < 0.5){
+    /*    if(confidence_score < 0.2){
             res = resultForHuman_11(20)
             confidence_score = 0F
-        } */
+        }*/
 
         //calcolo inferenza
-        val weight = modelWeight.runInference(inputData)
-        val height = modelHeight.runInference(inputData)
-        val age = modelAge.runInference(inputData)
+        val weight = modelWeight.runInference(reshapeInputData(inputData))
+        val height = modelHeight.runInference(reshapeInputData(inputData))
+        val age = modelAge.runInference(reshapeInputData(inputData))
         //aggiunta valori nelle relative liste
         listWeight.add(weight.first)
         listHeight.add(height.first)
@@ -86,13 +86,13 @@ class MainActivity : AppCompatActivity() {
 
         this@MainActivity.runOnUiThread {
             //scrittura dell'inferenza sulla attivita'
-         /*   displayTextView.append("\n")
+           displayTextView.append("\n")
             displayTextView.append(res)
             displayTextView.append(" ")
-            displayTextView.append(confidence_score.toString()) */
+            displayTextView.append(confidence_score.toString())
 
             //scrittura dell'inferenza del peso se si sta camminando o correndo
-   /*         if(inference.first.toInt() == 7 || inference.first.toInt() == 10 || inference.first.toInt() == 8 || inference.first.toInt() == 9){
+           /* if(inference.first.toInt() == 7 || inference.first.toInt() == 10 || inference.first.toInt() == 8 || inference.first.toInt() == 9){
                 //inferenza peso
                 val weight = modelWeight.runInference(reshapeInputData(inputData))
                 displayWeight.text = weight.first.toString()
@@ -113,7 +113,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         //model initialization
-    //    tfliteModel = TensorFlowLiteModel(this, "model_11_classes.tflite", 11)
+        tfliteModel = TensorFlowLiteModel(this, "model_10_classes.tflite", 10)
         modelWeight = TensorFlowLiteModel(this, "model_weight(mse2_2).tflite", 1)
         modelHeight = TensorFlowLiteModel(this, "model_height(mse5_8).tflite", 1)
         modelAge = TensorFlowLiteModel(this, "model_age(mse1_5).tflite", 1)
@@ -133,8 +133,8 @@ class MainActivity : AppCompatActivity() {
         mSensorReader = SensorReaderHelper(
             this,
             mHandler,
-            50,
-            20 //periodo = 1000(1s) / Hz . tempo tra un campione e l'altro
+            200,
+            10 //periodo = 1000(1s) / Hz . tempo tra un campione e l'altro
         )
         //handler = android.os.Handler(Looper.getMainLooper())
         //button for inference
@@ -277,7 +277,7 @@ class MainActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         mSensorReader.stop()
-       // tfliteModel.close()
+        tfliteModel.close()
         modelHeight.close()
         modelAge.close()
         modelWeight.close()
