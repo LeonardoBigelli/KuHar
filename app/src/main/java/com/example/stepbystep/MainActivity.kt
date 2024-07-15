@@ -45,7 +45,7 @@ class MainActivity : AppCompatActivity() {
 
     @RequiresApi(Build.VERSION_CODES.O)
     private val mHandler = SensorDataHandler { sensorData ->
-        val sampleSize = 200 // Assuming 200 samples for 2 seconds at 100Hz
+        val sampleSize = 100 // Assuming 200 samples for 2 seconds at 100Hz
         val featuresPerSample = 6 // 3 accelerometer + 3 gyroscope
         val inputData = Array(sampleSize) { FloatArray(featuresPerSample) }
 
@@ -68,7 +68,7 @@ class MainActivity : AppCompatActivity() {
 
         //inferenza attivita'
         val inference = tfliteModel.runInference(inputData)
-        var res = resultForHuman_10(inference.first.toInt())
+        var res = resultForHuman_realWorld2016(inference.first.toInt() + 1)
         var confidence_score = inference.second
     /*    if(confidence_score < 0.2){
             res = resultForHuman_11(20)
@@ -76,13 +76,13 @@ class MainActivity : AppCompatActivity() {
         }*/
 
         //calcolo inferenza
-        val weight = modelWeight.runInference(reshapeInputData(inputData))
+   /*     val weight = modelWeight.runInference(reshapeInputData(inputData))
         val height = modelHeight.runInference(reshapeInputData(inputData))
         val age = modelAge.runInference(reshapeInputData(inputData))
         //aggiunta valori nelle relative liste
         listWeight.add(weight.first)
         listHeight.add(height.first)
-        listAge.add(age.first)
+        listAge.add(age.first) */
 
         this@MainActivity.runOnUiThread {
             //scrittura dell'inferenza sulla attivita'
@@ -99,9 +99,9 @@ class MainActivity : AppCompatActivity() {
             } */
 
             //scrittura peso, altezza e eta'
-            displayWeight.text = "%.2f".format(listWeight.average()).toString()
+   /*         displayWeight.text = "%.2f".format(listWeight.average()).toString()
             displayHeight.text = "%.2f".format(listHeight.average()).toString()
-            displayAge.text = listAge.average().toInt().toString()
+            displayAge.text = listAge.average().toInt().toString()*/
         }
     }
 
@@ -113,10 +113,10 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         //model initialization
-        tfliteModel = TensorFlowLiteModel(this, "model_act_10_classes.tflite", 10)
-        modelWeight = TensorFlowLiteModel(this, "model_weight(mse2_2).tflite", 1)
+        tfliteModel = TensorFlowLiteModel(this, "model_act_realWorld2016.tflite", 8)
+     /*   modelWeight = TensorFlowLiteModel(this, "model_weight(mse2_2).tflite", 1)
         modelHeight = TensorFlowLiteModel(this, "model_height(mse5_8).tflite", 1)
-        modelAge = TensorFlowLiteModel(this, "model_age(mse1_5).tflite", 1)
+        modelAge = TensorFlowLiteModel(this, "model_age(mse1_5).tflite", 1)*/
 
 
         val permission = Manifest.permission.WRITE_EXTERNAL_STORAGE
@@ -133,8 +133,8 @@ class MainActivity : AppCompatActivity() {
         mSensorReader = SensorReaderHelper(
             this,
             mHandler,
-            200,
-            10 //periodo = 1000(1s) / Hz . tempo tra un campione e l'altro
+            100,
+            20 //periodo = 1000(1s) / Hz . tempo tra un campione e l'altro
         )
         //handler = android.os.Handler(Looper.getMainLooper())
         //button for inference
@@ -248,6 +248,19 @@ class MainActivity : AppCompatActivity() {
         7 -> "camminare all'indietro"
         8 -> "camminare in cerchio"
         9 -> "correre"
+        else -> "unknown"
+    }
+
+    //funzione per il modello di realWorld 2016
+    private fun resultForHuman_realWorld2016(n: Int): String = when (n) {
+        1 -> "in piedi"
+        2 -> "star sdraiato"
+        3 -> "star seduto"
+        4 -> "saltare"
+        5 -> "arrampicarsi verso l'alto"
+        6 -> "arrampicarsi verso il basso"
+        7 -> "camminare"
+        8 -> "correre"
         else -> "unknown"
     }
 

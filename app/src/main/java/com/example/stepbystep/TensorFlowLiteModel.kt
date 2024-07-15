@@ -46,14 +46,11 @@ class TensorFlowLiteModel(context: MainActivity, name_model: String, out: Int) {
                 inputBuffer.putFloat(inputData[i][j])
             }
         }
-
+        Log.i("Ris", inputData.size.toString())
         // val outputData = FloatArray(18) // Modifica in base all'output del tuo modello
         val outputData = Array(1) { FloatArray(outputModel) }
-        Log.w("Debug", "ok: prima dell'inferenza");//return 600
         interpreter?.run(inputBuffer, outputData)
-        Log.w("Debug", "ok: dopo l'inferenza");//return 600
-        Log.i("Ris", outputData[0].toString())
-        if (outputModel == 10) {
+        if (outputModel != 1) {
             ris = Pair(argmax(outputData[0]).toFloat(), outputData[0][argmax(outputData[0])])
         } else if(outputModel == 1){
             ris = Pair(outputData[0][0], 1.0.toFloat())
