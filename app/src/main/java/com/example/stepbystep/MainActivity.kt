@@ -45,7 +45,7 @@ class MainActivity : AppCompatActivity() {
 
     @RequiresApi(Build.VERSION_CODES.O)
     private val mHandler = SensorDataHandler { sensorData ->
-        val sampleSize = 100 // Assuming 200 samples for 2 seconds at 100Hz
+        val sampleSize = 200 // Assuming 200 samples for 2 seconds at 100Hz
         val featuresPerSample = 6 // 3 accelerometer + 3 gyroscope
         val inputData = Array(sampleSize) { FloatArray(featuresPerSample) }
 
@@ -68,7 +68,7 @@ class MainActivity : AppCompatActivity() {
 
         //inferenza attivita'
         val inference = tfliteModel.runInference(inputData)
-        var res = resultForHuman_realWorld2016(inference.first.toInt() + 1)
+        var res = resultForHuman_10(inference.first.toInt())
         var confidence_score = inference.second
     /*    if(confidence_score < 0.2){
             res = resultForHuman_11(20)
@@ -113,7 +113,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         //model initialization
-        tfliteModel = TensorFlowLiteModel(this, "model_act_realWorld2016.tflite", 8)
+        tfliteModel = TensorFlowLiteModel(this, "model_act_10_classes.tflite", 10)
      /*   modelWeight = TensorFlowLiteModel(this, "model_weight(mse2_2).tflite", 1)
         modelHeight = TensorFlowLiteModel(this, "model_height(mse5_8).tflite", 1)
         modelAge = TensorFlowLiteModel(this, "model_age(mse1_5).tflite", 1)*/
@@ -133,8 +133,8 @@ class MainActivity : AppCompatActivity() {
         mSensorReader = SensorReaderHelper(
             this,
             mHandler,
-            100,
-            20 //periodo = 1000(1s) / Hz . tempo tra un campione e l'altro
+            200,
+            10 //periodo = 1000(1s) / Hz . tempo tra un campione e l'altro
         )
         //handler = android.os.Handler(Looper.getMainLooper())
         //button for inference
@@ -177,7 +177,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun reshapeInputData(inputData: Array<FloatArray>): Array<FloatArray> {
         var data = Array(50) { FloatArray(6) }
-        for(i in data.indices){
+       for(i in data.indices){
             data[i][0] = inputData[i * 4][0]
             data[i][1] = inputData[i * 4][1]
             data[i][2] = inputData[i * 4][2]
@@ -253,14 +253,10 @@ class MainActivity : AppCompatActivity() {
 
     //funzione per il modello di realWorld 2016
     private fun resultForHuman_realWorld2016(n: Int): String = when (n) {
-        1 -> "in piedi"
-        2 -> "star sdraiato"
-        3 -> "star seduto"
-        4 -> "saltare"
-        5 -> "arrampicarsi verso l'alto"
-        6 -> "arrampicarsi verso il basso"
-        7 -> "camminare"
-        8 -> "correre"
+        0 -> "corsa"
+        1 -> "camminata"
+        2 -> "scendi"
+        3 -> "sali"
         else -> "unknown"
     }
 
