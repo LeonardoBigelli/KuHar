@@ -19,7 +19,7 @@ class TensorFlowLiteModel(context: MainActivity, name_model: String, out: Int) {
         try {
             interpreter = Interpreter(loadModelFile(context, name_model, out))
         } catch (e: IOException) {
-            e.printStackTrace()// modificare
+            Log.i("Errore...", "FILE NON TROVATO")
         }
     }
 

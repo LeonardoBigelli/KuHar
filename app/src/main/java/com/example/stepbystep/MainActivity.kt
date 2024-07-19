@@ -64,16 +64,16 @@ class MainActivity : AppCompatActivity() {
         val txt_final = ".txt"
         val txt_stamp = StringBuilder()
         txt_stamp.append(txt).append(time).append(txt_final)
-      //  scriviArraySuFile(this, inputData, txt_stamp.toString())
+        scriviArraySuFile(this, inputData, txt_stamp.toString())
 
         //inferenza attivita'
         val inference = tfliteModel.runInference(inputData)
         var res = resultForHuman_10(inference.first.toInt())
         var confidence_score = inference.second
-    /*    if(confidence_score < 0.2){
+        if(confidence_score < 0.2){
             res = resultForHuman_11(20)
             confidence_score = 0F
-        }*/
+        }
 
         //calcolo inferenza
    /*     val weight = modelWeight.runInference(reshapeInputData(inputData))
@@ -184,7 +184,7 @@ class MainActivity : AppCompatActivity() {
             data[i][3] = inputData[i * 4][3]
             data[i][4] = inputData[i * 4][4]
             data[i][5] = inputData[i * 4][5]
-        }
+        } // commentato per usare motionsense
 
         var data_finale = Array(50) { FloatArray(6) }
         //inverto assi acceleromentro e giroscopio
@@ -253,10 +253,23 @@ class MainActivity : AppCompatActivity() {
 
     //funzione per il modello di realWorld 2016
     private fun resultForHuman_realWorld2016(n: Int): String = when (n) {
+        0 -> "stare in piedi"
+        1 -> "stare sdraiato"
+        2 -> "stare seduto"
+        3 -> "saltare"
+        4 -> "arrampicarsi verso l'alto"
+        5 -> "arrampicarsi verso il basso"
+        6 -> "camminare"
+        7 -> "correre"
+        else -> "unknown"
+    }
+
+    //funzione per motionsense
+    private fun resultForHuman_motionSense(n: Int): String = when (n) {
         0 -> "corsa"
         1 -> "camminata"
-        2 -> "scendi"
-        3 -> "sali"
+        2 -> "scendere le scale"
+        3 -> "salire le scale"
         else -> "unknown"
     }
 
