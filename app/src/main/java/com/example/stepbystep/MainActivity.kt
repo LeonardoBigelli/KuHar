@@ -37,6 +37,9 @@ class MainActivity : AppCompatActivity() {
     private lateinit var myButton: Button
     private lateinit var removeButton: ImageButton
     private lateinit var mSensorReader: SensorReaderHelper
+    //filtro passa-basso
+    private val lowPassFilter = LowPassFilter(5)//5 rappresenta la dimensione della finestra
+    private val predictions = ArrayList<Int>()
 
     //array per calcolare la media dei risultati
     private var listWeight = ArrayList<Float>()
@@ -68,12 +71,23 @@ class MainActivity : AppCompatActivity() {
 
         //inferenza attivita'
         val inference = tfliteModel.runInference(inputData)
-        var res = resultForHuman_10(inference.first.toInt())
-        var confidence_score = inference.second
+
+        //codice per il filtro
+        var filteredPrediction = 0
+        var res = ""
+        if(predictions.size < 5){
+            predictions.add(inference.first.toInt())
+        } else {
+            for(p in predictions){
+                filteredPrediction = lowPassFilter.addPrediction(p)
+            }
+            res = resultForHuman_10(filteredPrediction)
+        }
+      /*  var confidence_score = inference.second
         if(confidence_score < 0.2){
             res = resultForHuman_11(20)
             confidence_score = 0F
-        }
+        } */
 
         //calcolo inferenza
    /*     val weight = modelWeight.runInference(reshapeInputData(inputData))
@@ -88,8 +102,8 @@ class MainActivity : AppCompatActivity() {
             //scrittura dell'inferenza sulla attivita'
            displayTextView.append("\n")
             displayTextView.append(res)
-            displayTextView.append(" ")
-            displayTextView.append(confidence_score.toString())
+          /*  displayTextView.append(" ")
+            displayTextView.append(confidence_score.toString())*/
 
             //scrittura dell'inferenza del peso se si sta camminando o correndo
            /* if(inference.first.toInt() == 7 || inference.first.toInt() == 10 || inference.first.toInt() == 8 || inference.first.toInt() == 9){
