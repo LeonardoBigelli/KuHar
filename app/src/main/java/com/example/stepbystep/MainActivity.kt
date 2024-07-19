@@ -78,6 +78,7 @@ class MainActivity : AppCompatActivity() {
         if(predictions.size < 5){
             predictions.add(inference.first.toInt())
         } else {
+            predictions.add(inference.first.toInt())
             for(p in predictions){
                 filteredPrediction = lowPassFilter.addPrediction(p)
             }
