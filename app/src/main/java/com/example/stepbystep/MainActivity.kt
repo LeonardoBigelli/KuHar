@@ -67,7 +67,7 @@ class MainActivity : AppCompatActivity() {
         val txt_final = ".txt"
         val txt_stamp = StringBuilder()
         txt_stamp.append(txt).append(time).append(txt_final)
-        scriviArraySuFile(this, inputData, txt_stamp.toString())
+       // scriviArraySuFile(this, inputData, txt_stamp.toString())
 
         //inferenza attivita'
         val inference = tfliteModel.runInference(inputData)
